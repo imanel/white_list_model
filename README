@@ -1,0 +1,38 @@
+WhiteListModel v 0.1 Beta
+==============
+
+Instead of use white_list_helper in every view just use it as model before_filter!
+
+== Requirements
+
+white_list (http://svn.techno-weenie.net/projects/plugins/white_list/)
+
+== Usage
+
+class News < ActiveRecord::Base
+  white_list   # Filter all string or text fields with standard white_list_helper
+end
+
+class News < ActiveRecord::Base
+  white_list :only => [ :description ]  # Filter description field with standard white_list_helper
+end
+
+== Avalible parameters
+
+:only => []       # Filter only included fields
+:except => []     # Filter all string or text fields except included
+:tags => []       # Add specified tags to allowed list
+:attributes => [] # Add specified attributes to allowed list
+
+== Other informations
+
+This plugin for now uses white_list_helper class so any modyfications within base tags/attributes of WhiteListHelper class will change behawior of this plugin.
+
+== TODO
+
+Migrate to internal WhiteListHelper so it will be independent.
+Add profiles so user can set :profile => :profile_name instead of setting tags/attributes each time.
+Add tests.
+
+==============
+Copyright (c) 2008 Bernard Potocki, released under the MIT license
