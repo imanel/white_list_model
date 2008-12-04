@@ -1,17 +1,16 @@
-WhiteListModel
-==============
+= WhiteListModel
 
 Instead of using white_list_helper in every view just use it as model before_filter! This way you don't have to escape/whitelist user-input data in every place they appear, just filter it on save.
 
 == Usage
 
-class News < ActiveRecord::Base
-  white_list  # Filter all string or text fields with standard white_list_helper
-end
+  class News < ActiveRecord::Base
+    white_list  # Filter all string or text fields with standard filter set
+  end
 
-class News < ActiveRecord::Base
-  white_list :only => [ :description ]  # Filter description field with standard white_list_helper
-end
+  class News < ActiveRecord::Base
+    white_list :only => [ :description ]  # Filter description field with standard filter set
+  end
 
 == Avalible parameters
 
@@ -25,5 +24,4 @@ end
 
 Profile will be used as template, and other options will be merged, so if you want options to be fully customized, use empty profile.
 
-==============
 Copyright (c) 2008 Bernard Potocki, released under the MIT license
