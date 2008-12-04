@@ -1,7 +1,7 @@
 WhiteListModel
 ==============
 
-Instead of use white_list_helper in every view just use it as model before_filter!
+Instead of using white_list_helper in every view just use it as model before_filter! This way you don't have to escape/whitelist user-input data in every place they appear, just filter it on save.
 
 == Usage
 
@@ -15,15 +15,15 @@ end
 
 == Avalible parameters
 
-:only => []          # Filter only included fields
-:except => []        # Filter all string or text fields except included
-:attributes => []    # Add specified attributes to allowed list
-:bad_tags =>         # Add specified tags to completely trim
-:protocols => []     # Add specified protocols to allowed list
-:tags => []          # Add specified tags to allowed list
-:profile => :default # Load specified profile. If no profile given then :default will be used. Avalible profiles :empty, :mini, :base, :web and :default
+  :only => []          # Filter only included fields
+  :except => []        # Filter all string or text fields except included
+  :attributes => []    # Add specified attributes to allowed list
+  :bad_tags =>         # Add specified tags to completely trim
+  :protocols => []     # Add specified protocols to allowed list
+  :tags => []          # Add specified tags to allowed list
+  :profile => :default # Load specified profile. If no profile given then :default will be used. Avalible profiles :empty, :mini, :base, :web and :default
 
-Profile will be used as template, and other options will be merged. So if you want to fully customize options then you should use empty profile.
+Profile will be used as template, and other options will be merged, so if you want options to be fully customized, use empty profile.
 
 ==============
 Copyright (c) 2008 Bernard Potocki, released under the MIT license
