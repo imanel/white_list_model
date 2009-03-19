@@ -99,7 +99,7 @@ module WhiteListModel
         bad_tags = Set.new(options[:bad_tags])
         prot     = Set.new(options[:protocols])
         tags     = Set.new(options[:tags])
-        block = lambda { |node, bad| bad_tags.include?(bad) ? nil : node.to_s.gsub(/</, '&lt;') }
+        @included_bad_tags = []
         returning [] do |new_text|
           tokenizer = HTML::Tokenizer.new(text)
           bad       = nil
@@ -116,17 +116,26 @@ module WhiteListModel
                   end
                 end if node.attributes
                 if tags.include?(node.name)
-                  bad = nil
                   node
+                elsif bad_tags.include?(node.name)
+                  indent_bad_tag(node)
                 else
-                  bad = node.name
-                  block.call node, bad
+                  node.to_s.gsub(/</, '&lt;') if @included_bad_tags.empty?
                 end
               else
-                block.call node, bad
+                node.to_s.gsub(/</, '&lt') if @included_bad_tags.empty?
             end
           end
         end.join
+      end
+
+      def indent_bad_tag(tag)
+        case tag.closing
+        when nil then @included_bad_tags << tag.name
+        when :close then @included_bad_tags.delete_at( @included_bad_tags.index(tag.name) ) rescue nil
+        else nil
+        end
+        nil
       end
 
       def contains_bad_protocols?(value, protocols)
