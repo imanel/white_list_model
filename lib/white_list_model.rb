@@ -40,7 +40,7 @@ module WhiteListModel
   module ClassMethods
 
     def white_list(options = {})
-      before_save :white_list_fields
+      before_validation :white_list_fields
 
       write_inheritable_attribute(:white_list_options, {
         :only       => (options[:only] || []),
