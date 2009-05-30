@@ -41,22 +41,52 @@ module WhiteListModel
 
     def white_list(options = {})
       before_validation :white_list_fields
-
-      write_inheritable_attribute(:white_list_options, {
-        :only       => (options[:only] || []),
-        :except     => (options[:except] || []),
-        :attributes => (options[:attributes] || []),
-        :bad_tags   => (options[:bad_tags] || []),
-        :protocols  => (options[:protocols] || []),
-        :tags       => (options[:tags] || []),
-        :profile    => (options[:profile] || :default)
-      })
-
+      update_white_list_options(options)
       class_inheritable_reader :white_list_options
-
       include WhiteListModel::InstanceMethods
     end
 
+    protected
+
+    def update_white_list_options(options)
+      opts = read_inheritable_attribute(:white_list_options) || {}
+      only = options.delete(:only)
+      except = options.delete(:except)
+      method = options.delete(:method)
+      method = :replace unless [ :replace, :update ].include?(method)
+      options = format_white_list_options(options)
+      
+      return if only && except
+
+      if only.nil? && except.nil?
+        opts = {} if method == :replace
+        opts[:white_list_defaults] = options
+      elsif only
+        opts = {} if method == :replace
+        only.to_a.each do |key|
+          opts[key] = options
+        end
+      else
+        new_options = { :white_list_defaults => options }
+        except.to_a.each do |e|
+          new_options[e] = ( method == :replace ? 0 : opts[e] || 0 )
+        end
+        opts = new_options
+      end
+      write_inheritable_attribute(:white_list_options, opts)
+    end
+
+    def format_white_list_options(options)
+      opts = {
+        :attributes => options[:attributes] || [],
+        :bad_tags   => options[:bad_tags]   || [],
+        :profile    => options[:profile]    || :default,
+        :protocols  => options[:protocols]  || [],
+        :tags       => options[:tags]       || []
+      }
+      opts
+    end
+    
   end
 
   module InstanceMethods
@@ -64,16 +94,9 @@ module WhiteListModel
     def white_list_fields
       # fix a bug with Rails internal AR::Base models that get loaded before
       # the plugin, like CGI::Sessions::ActiveRecordStore::Session
-      return if white_list_options.nil?
+      return if white_list_options.nil? || !white_list_options.is_a?(Hash)
 
-      opts = {}
       profiles = WhiteListModel::PROFILES
-      profile = ( profiles.include?(white_list_options[:profile].to_sym) )? profiles[white_list_options[:profile].to_sym] : profiles[:default]
-      opts[:attributes] = (profile[:attributes] + white_list_options[:attributes]).uniq
-      opts[:bad_tags] = (profile[:bad_tags] + white_list_options[:bad_tags]).uniq
-      opts[:protocols] = (profile[:protocols] + white_list_options[:protocols]).uniq
-      opts[:tags] = (profile[:tags] + white_list_options[:tags]).uniq
-
 
       self.class.columns.each do |column|
         next unless (column.type == :string || column.type == :text)
@@ -83,11 +106,18 @@ module WhiteListModel
 
         next if value.nil?
 
-        unless white_list_options[:only].empty?
-          self[field] = white_list_parse(value, opts ) if white_list_options[:only].include?(field)
-        else
-          self[field] = white_list_parse(value, opts ) unless white_list_options[:except].include?(field)
-        end
+        field_options = white_list_options[field] || white_list_options[:white_list_defaults]
+        next if field_options.nil? || field_options == 0
+
+        opts = {}
+        profile = ( profiles.include?(field_options[:profile].to_sym) )? profiles[field_options[:profile].to_sym] : profiles[:default]
+        profile = profiles[:default]
+        opts[:attributes] = (profile[:attributes] + field_options[:attributes]).uniq
+        opts[:bad_tags]   = (profile[:bad_tags]   + field_options[:bad_tags]).uniq
+        opts[:protocols]  = (profile[:protocols]  + field_options[:protocols]).uniq
+        opts[:tags]       = (profile[:tags]       + field_options[:tags]).uniq
+
+        self[field] = white_list_parse(value, opts )
       end
     end
 

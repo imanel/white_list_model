@@ -9,7 +9,12 @@ Instead of using white_list_helper in every view just use it as model before_fil
   end
 
   class News < ActiveRecord::Base
-    white_list :only => [ :description ]  # Filter description field with standard filter set
+    white_list :only => :description  # Filter description field with standard filter set
+  end
+
+  class News < ActiveRecord::Base
+    white_list :except => [:title, :description], :profile => :mini # Filter everything except :title and :description with :mini profile
+    white_list :only => :description, :method => :update, :profile => :web # Filter :description with :web profile and everything else except :title with :mini profile
   end
 
 == Avalible parameters
@@ -17,10 +22,11 @@ Instead of using white_list_helper in every view just use it as model before_fil
   :only => []          # Filter only included fields
   :except => []        # Filter all string or text fields except included
   :attributes => []    # Add specified attributes to allowed list
-  :bad_tags =>         # Add specified tags to completely trim
+  :bad_tags => []      # Add specified tags to completely trim
   :protocols => []     # Add specified protocols to allowed list
   :tags => []          # Add specified tags to allowed list
   :profile => :default # Load specified profile. If no profile given then :default will be used. Avalible profiles :empty, :mini, :base, :web and :default
+  :method => :update   # You can use more than one set of parameters. Default method is :replace - when you use it then all previous options will be erased. But with :update method you can collect as many combinations as you want(see example above)
 
 Profile will be used as template, and other options will be merged, so if you want options to be fully customized, use empty profile.
 

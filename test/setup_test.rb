@@ -6,8 +6,5 @@ require 'test/unit'
 # load test schema
 load(File.dirname(__FILE__) + "/schema.rb")
  
-# load test models
-require File.join(File.dirname(__FILE__), 'models/white_list_all')
-require File.join(File.dirname(__FILE__), 'models/white_list_except')
-require File.join(File.dirname(__FILE__), 'models/white_list_none')
-require File.join(File.dirname(__FILE__), 'models/white_list_only')
+# load test model
+require File.join(File.dirname(__FILE__), 'models/white_list_test')

@@ -2,41 +2,57 @@ require 'test_helper'
 
 class WhiteListModelTest < ActiveSupport::TestCase
 
-  test "should not sanitize not whitelisted models" do
-    model = WhiteListNone.create(unsanitized_hash)
-    unsanitized_hash.keys.each do |key|
-      assert_equal unsanitized_hash[key], model.attributes[key.to_s]
-    end
-  end
-
-  test "should complete sanitize whitelisted models" do
-    model = WhiteListAll.create(unsanitized_hash)
+  test "should sanitize whitelisted models" do
+    WhiteListTest.send(:white_list)
+    model = WhiteListTest.create(unsanitized_hash)
     unsanitized_hash.keys.each do |key|
       assert_equal sanitized_hash[key], model.attributes[key.to_s]
     end
   end
 
   test "should sanitize whitelisted models without :except fields" do
-    model = WhiteListExcept.create(unsanitized_hash)
-    unsanitized_hash.reject{ |key,value| model.white_list_options[:except].include?(key) }.keys.each do |key|
+    WhiteListTest.send(:white_list, :except => altered_fields)
+    model = WhiteListTest.create(unsanitized_hash)
+    unsanitized_hash.reject{ |key,value| altered_fields.include?(key) }.keys.each do |key|
       assert_equal sanitized_hash[key], model.attributes[key.to_s]
     end
-    model.white_list_options[:except].each do |key|
+    altered_fields.each do |key|
       assert_equal unsanitized_hash[key], model.attributes[key.to_s]
     end
   end
 
   test "should not sanitize whitelisted models except :only fields" do
-    model = WhiteListOnly.create(unsanitized_hash)
-    unsanitized_hash.reject{ |key,value| model.white_list_options[:only].include?(key) }.keys.each do |key|
+    WhiteListTest.send(:white_list, :only => altered_fields)
+    model = WhiteListTest.create(unsanitized_hash)
+    unsanitized_hash.reject{ |key,value| altered_fields.include?(key) }.keys.each do |key|
       assert_equal unsanitized_hash[key], model.attributes[key.to_s]
     end
-    model.white_list_options[:only].each do |key|
+    altered_fields.each do |key|
+      assert_equal sanitized_hash[key], model.attributes[key.to_s]
+    end
+  end
+
+  test "should allow to replace default whitelist options" do
+    WhiteListTest.send(:white_list, :only => altered_fields)
+    model = WhiteListTest.create(unsanitized_hash)
+    unsanitized_hash.reject{ |key,value| altered_fields.include?(key) }.keys.each do |key|
+      assert_equal unsanitized_hash[key], model.attributes[key.to_s]
+    end
+    altered_fields.each do |key|
+      assert_equal sanitized_hash[key], model.attributes[key.to_s]
+    end
+    WhiteListTest.send(:white_list)
+    model = WhiteListTest.create(unsanitized_hash)
+    unsanitized_hash.keys.each do |key|
       assert_equal sanitized_hash[key], model.attributes[key.to_s]
     end
   end
 
   protected
+
+  def altered_fields
+    [:string_field1, :text_field1]
+  end
 
   def unsanitized_hash
     {
