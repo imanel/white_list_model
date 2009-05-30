@@ -83,7 +83,7 @@ module WhiteListModel
 
         next if value.nil?
 
-        if white_list_options[:only]
+        unless white_list_options[:only].empty?
           self[field] = white_list_parse(value, opts ) if white_list_options[:only].include?(field)
         else
           self[field] = white_list_parse(value, opts ) unless white_list_options[:except].include?(field)
