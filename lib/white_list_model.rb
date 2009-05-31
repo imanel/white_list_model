@@ -152,7 +152,7 @@ module WhiteListModel
                   node.to_s.gsub(/</, '&lt;') if @included_bad_tags.empty?
                 end
               else
-                node.to_s.gsub(/</, '&lt') if @included_bad_tags.empty?
+                node.to_s.gsub(/</, '&lt;') if @included_bad_tags.empty?
             end
           end
         end.join
