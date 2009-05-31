@@ -48,6 +48,30 @@ class WhiteListModelTest < ActiveSupport::TestCase
     end
   end
 
+  test "should allow only tags from profile" do
+    WhiteListTest.send(:white_list, :profile => :base)
+    good_tags = WhiteListModel::PROFILES[:base][:tags]
+    bad_tags = WhiteListModel::PROFILES[:default][:tags] - good_tags
+    unsanitized_string = ""
+    sanitized_string = ""
+    good_tags.each do |tag|
+      unsanitized_string += "<#{tag}> "
+      sanitized_string += "<#{tag}> "
+    end
+    bad_tags.each do |tag|
+      unsanitized_string += "<#{tag}> temp </#{tag}> "
+      sanitized_string += "&lt;#{tag}> temp &lt;/#{tag}> "
+    end
+    good_tags.each do |tag|
+      unsanitized_string += "</#{tag}> "
+      sanitized_string += "</#{tag}> "
+    end
+    model = WhiteListTest.create( :text_field1 => unsanitized_string )
+    assert_equal sanitized_string, model.text_field1
+  end
+
+
+
   protected
 
   def altered_fields

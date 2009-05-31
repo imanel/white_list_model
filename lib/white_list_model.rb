@@ -110,8 +110,7 @@ module WhiteListModel
         next if field_options.nil? || field_options == 0
 
         opts = {}
-        profile = ( profiles.include?(field_options[:profile].to_sym) )? profiles[field_options[:profile].to_sym] : profiles[:default]
-        profile = profiles[:default]
+        profile = ( profiles.keys.include?(field_options[:profile].to_sym) )? profiles[field_options[:profile].to_sym] : profiles[:default]
         opts[:attributes] = (profile[:attributes] + field_options[:attributes]).uniq
         opts[:bad_tags]   = (profile[:bad_tags]   + field_options[:bad_tags]).uniq
         opts[:protocols]  = (profile[:protocols]  + field_options[:protocols]).uniq
