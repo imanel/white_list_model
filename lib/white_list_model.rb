@@ -98,11 +98,17 @@ module WhiteListModel
 
       profiles = WhiteListModel::PROFILES
 
-      self.class.columns.each do |column|
-        next unless (column.type == :string || column.type == :text)
+      fields = self.class.columns.collect do |column|
+        column.name.to_sym if (column.type == :string || column.type == :text)
+      end.compact
 
-        field = column.name.to_sym
-        value = self[field]
+      # Add globalize2 columns
+      fields += self.class.globalize_options[:translated_attributes].to_a.collect do |column|
+        column if (self.send(column).class == String || self.send(column).class == Text)
+      end.compact if self.class.respond_to?(:globalize_options)
+
+      fields.each do |field|
+        value = self.send(field)
 
         next if value.nil?
 
@@ -116,7 +122,7 @@ module WhiteListModel
         opts[:protocols]  = (profile[:protocols]  + field_options[:protocols]).uniq
         opts[:tags]       = (profile[:tags]       + field_options[:tags]).uniq
 
-        self[field] = white_list_parse(value, opts )
+        self.send( field.to_s + "=", white_list_parse(value, opts) )
       end
     end
 

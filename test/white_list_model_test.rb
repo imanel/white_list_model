@@ -211,6 +211,30 @@ class WhiteListModelTest < ActiveSupport::TestCase
     assert_white_listed img_hack, "<img>"
   end
 
+  # Globalize tests
+
+  test "should whitelist fields from globalize2 plugin" do
+    unsanitized_globalize_hash = {
+      :untranslated_field => unsanitized_hash[:string_field1],
+      :translated_field1 => unsanitized_hash[:string_field1],
+      :translated_field2 => unsanitized_hash[:string_field1]
+    }
+    sanitized_globalize_hash = {
+      :untranslated_field => sanitized_hash[:string_field1],
+      :translated_field1 => sanitized_hash[:string_field1],
+      :translated_field2 => unsanitized_hash[:string_field1]
+    }
+    model = WhiteListGlobalizeTest.create( unsanitized_globalize_hash )
+    unsanitized_globalize_hash.each do |key, value|
+      assert_equal value, model.send(key)
+    end
+    WhiteListGlobalizeTest.send(:white_list, :except => :translated_field2)
+    model = WhiteListGlobalizeTest.create( unsanitized_globalize_hash )
+    sanitized_globalize_hash.each do |key, value|
+      assert_equal value, model.send(key)
+    end
+  end
+
   protected
 
   def altered_fields

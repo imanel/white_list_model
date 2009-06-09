@@ -13,4 +13,15 @@ ActiveRecord::Schema.define(:version => 0) do
     t.time     "time_field"
   end
 
+  create_table "white_list_globalize_tests", :force => true do |t|
+    t.string "untranslated_field"
+  end
+
+  create_table "white_list_globalize_test_translations", :force => true do |t|
+    t.integer "white_list_globalize_test_id"
+    t.string "locale"
+    t.string "translated_field1"
+    t.string "translated_field2"
+  end
+
 end
