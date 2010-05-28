@@ -36,7 +36,7 @@ module WhiteListModel
   def self.included(base)
     base.extend(ClassMethods)
   end
-  
+
   module ClassMethods
 
     def white_list(options = {})
@@ -55,7 +55,7 @@ module WhiteListModel
       method = options.delete(:method)
       method = :replace unless [ :replace, :update ].include?(method)
       options = format_white_list_options(options)
-      
+
       return if only && except
 
       if only.nil? && except.nil?
@@ -86,7 +86,7 @@ module WhiteListModel
       }
       opts
     end
-    
+
   end
 
   module InstanceMethods
@@ -179,4 +179,8 @@ module WhiteListModel
       end
 
   end
+end
+
+if Object.const_defined?("ActiveRecord")
+  ActiveRecord::Base.send(:include, WhiteListModel)
 end
